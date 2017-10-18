@@ -233,6 +233,12 @@ var builtins = map[string]parse.Func{
 
 	// Other functions
 
+	"nanto": {
+		Args:   []models.FuncType{models.TypeNumberSet, models.TypeScalar},
+		Return: models.TypeNumberSet,
+		Tags:   tagFirst,
+		F:      Nanto,
+	},
 	"abs": {
 		Args:          []models.FuncType{models.TypeVariantSet},
 		VariantReturn: true,
@@ -830,6 +836,17 @@ func reduce(e *State, T miniprofiler.Timer, series *Results, F func(Series, ...f
 		return nil
 	}
 	return match(f, series, args...)
+}
+
+func Nanto(e *State, T miniprofiler.Timer, series *Results, v float64) (results *Results, err error) {
+	for _, s := range series.Results {
+		value := float64(s.Value.Value().(Number))
+		if math.IsNaN(value) {
+			value = v
+		}
+		s.Value = Number(value)
+	}
+	return series, nil
 }
 
 func Abs(e *State, T miniprofiler.Timer, set *Results) *Results {
